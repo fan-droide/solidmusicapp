@@ -164,9 +164,38 @@ async function writeFileToPod(file, targetFileURL) {
             file,                                       // File
             { contentType: file.type, fetch: session.fetch }    // mimetype if known, fetch from the authenticated session
         );
-        console.log(`File saved at ${getSourceUrl(savedFile)}`);
+        const location = getSourceUrl(savedFile)
+        console.log(`File saved at ${location}`);
+        const sendToBackend = await sendPost(location) // needs to be fixed
+        console.log('Sent to backend ', sendToBackend)
+        const authFetch = await fetch('http://localhost:3001/fetch?resource='+location)
+        .then((response) => response.json())
+        .then((data) => console.log(data));
 
     } catch (error) {
         console.error(error);
     }
+}
+
+async function sendPost(fileInfo){
+    const data = { location: fileInfo };
+    await fetch('http://localhost:3001/api/newsong', {
+        
+    credentials: 'include',          
+    method: 'POST', // or 'PUT'
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        console.log('Success:', data);
+        return data
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        return error
+    })
+    
 }
